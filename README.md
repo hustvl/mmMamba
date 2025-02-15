@@ -47,6 +47,7 @@ Distilled from the Transformer-based decoder-only HoVLE, the pure Mamba-2-based 
 - [Getting started](docs/getting_started.md)
 - [Preparation of mmMamba environment](docs/install.md)
 - [Training and Evaluation](docs/train_eval.md)
+- [Usage](docs/usage.md)
 
 ## Acknowledgement
 mmMamba is greatly inspired by the following outstanding contributions to the open-source community: [mamba](https://github.com/state-spaces/mamba), [LolCATs](https://github.com/HazyResearch/lolcats), [phi-mamba](https://github.com/goombalab/phi-mamba), [MambaInLlama](https://github.com/jxiw/MambaInLlama), [HoVLE](https://huggingface.co/OpenGVLab/HoVLE), [SOLO](https://github.com/Yangyi-Chen/SOLO).
