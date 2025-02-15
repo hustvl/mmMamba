@@ -2,11 +2,11 @@
 <h1>mmMamba</h1>
 <h3>Decoder-only Multimodal State Space Model via Quadratic to Linear Distillation</h3>
 
-[Bencheng Liao](https://github.com/LegendBC)<sup>1,2</sup>, [Hongyuan Tao](https://github.com/Hongyuan-Tao)<sup>2</sup>, [Qian Zhang](https://scholar.google.com/citations?user=pCY-bikAAAAJ&hl=zh-CN)<sup>3</sup>, [Tianheng Cheng](https://scholar.google.com/citations?user=PH8rJHYAAAAJ&hl=en)<sup>2</sup>,  [Yingyue Li](https://github.com/Yingyue-L)<sup>2</sup>,  Haoran Yin<sup>3</sup>, [Wenyu Liu](https://scholar.google.com/citations?user=D7jDk7gAAAAJ&hl=en)<sup>2</sup>, [Xinggang Wang](https://xwcv.github.io)<sup>2 :email:</sup>
+[Bencheng Liao](https://github.com/LegendBC)<sup>1,2,*</sup>, [Hongyuan Tao](https://github.com/Hongyuan-Tao)<sup>2,*</sup>, [Qian Zhang](https://scholar.google.com/citations?user=pCY-bikAAAAJ&hl=zh-CN)<sup>3</sup>, [Tianheng Cheng](https://scholar.google.com/citations?user=PH8rJHYAAAAJ&hl=en)<sup>2</sup>,  [Yingyue Li](https://github.com/Yingyue-L)<sup>2</sup>,  Haoran Yin<sup>3</sup>, [Wenyu Liu](https://scholar.google.com/citations?user=D7jDk7gAAAAJ&hl=en)<sup>2</sup>, [Xinggang Wang](https://xwcv.github.io)<sup>2 :email:</sup>
  
 <sup>1</sup> Institute of Artificial Intelligence, HUST, <sup>2</sup> School of EIC, HUST, <sup>3</sup> Horizon Robotics
 
-(<sup>:email:</sup>) corresponding author, xgwang@hust.edu.cn
+<sup>*</sup> equal contribution, <sup>:email:</sup> corresponding author, xgwang@hust.edu.cn
 
 
 [![mmMamba](https://img.shields.io/badge/Paper-mmMamba-2b9348.svg?logo=arXiv)](https://arxiv.org/abs/2411.xxx)&nbsp;
