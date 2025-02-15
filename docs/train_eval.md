@@ -14,5 +14,3 @@
 ### InternVL Evalkit
 
 
-## Usage
-
