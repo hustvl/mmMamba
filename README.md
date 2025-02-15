@@ -32,7 +32,7 @@ We propose mmMamba, the first decoder-only multimodal state space model via quad
 Distilled from the Transformer-based decoder-only HoVLE, the pure Mamba-2-based linear-complexity mmMamba-linear achieves competitive performance against existing linear and quadratic-complexity VLMs, while mmMamba-hybrid further improves performance significantly, approaching HoVLE's capabilities. At 103K tokens, mmMamba-linear demonstrates 20.6x speedup and 75.8\% GPU memory reduction compared to HoVLE, while mmMamba-hybrid achieves 13.5x speedup and 60.2\% memory savings.
 
 <div align="center">
-<img src="assets/teaser.png" />
+<img src="assets/teaser.jpg" />
 
 
 <b>Seeding strategy and three-stage distillation pipeline of mmMamba.</b>
