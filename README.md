@@ -1,5 +1,4 @@
 <div align="center">
-<img src="assets/logo.png" width="80">
 <h1>mmMamba</h1>
 <h3>Decoder-only Multimodal State Space Model via Quadratic to Linear Distillation</h3>
 
