@@ -1,0 +1,84 @@
+dataset:
+  name: internvl_dataload
+  dataset_config:
+    conv_style: "internlm2-chat"
+    meta_path: configs/dataset/VLM-SFT.json            #符合internvl的数据集配置文件
+    force_image_size: 448
+    max_dynamic_patch: 12  
+    min_dynamic_patch: 1
+    down_sample_ratio: 1
+    max_length: 8192
+    dynamic_image_size: True
+    normalize_type: "imagenet"
+    use_packed_ds: false
+    use_thumbnail: True
+    pad2square: false
+    use_data_resampling: false
+
+  pretrained_model_config:  # will be updated based on model_config
+    pretrained_model_name_or_path: 'meta-llama/Meta-Llama-3-8B'      
+    cache_dir: '/scratch/'
+  preprocess_config: null
+
+dataloader:
+  batch_size: 1
+  num_workers: 8
+  drop_last: false
+  pin_memory: true
+
+optimizer:
+  optim: adamw_torch_fused
+  lr: 1e-4
+  weight_decay: 0.05
+
+lr_scheduler:
+  lr_scheduler_type: reduce_lr_on_plateau
+  mode: min
+  factor: 0.1
+  patience: 10054
+  min_lr: 0.00001
+  #lr_scheduler_type: linear
+  #num_warmup_steps: 200
+  #num_training_steps: 230000
+
+trainer: # HuggingFace Trainer-like arguments
+  name: default_lm
+  bf16: true
+  train_split: train
+  val_split: validation
+  num_train_epochs: 2
+  gradient_accumulation_steps: 8
+  seed: 42
+  batch_size: 1
+  load_best_model_at_end: true
+  greater_is_better: false
+  metric_for_best_model: eval/loss # eval/rouge/geometric_mean
+  logging_steps: 100
+  evaluation_strategy: steps
+  max_steps: -1
+  eval_steps: 100
+  max_eval_batches: 200
+
+finetune:
+  method: full           #采用qk全量微调
+  kwargs:
+    r: 8
+    lora_alpha: 16
+    lora_dropout: 0 # 0.05
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+  trainable_weights: ["attention.g_proj", 
+                       "attention.in_proj", 
+                       "attention.conv",
+                       "attention.D",
+                       "attention.q_norm",
+                       "attention.k_norm",
+                       "attention.feature_map_q", 
+                       "attention.feature_map_k", 
+                       "attention.g_norm",
+                       "attention.q_proj",
+                       "attention.k_proj",
+                      #  "attention.v_proj",
+                      #  "attention.o_proj",
+                       ]
+  softmax_attention_language: [0,4,8,12,16,20]
+  softmax_attention_embedding: [0,4]

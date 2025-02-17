@@ -1,0 +1,42 @@
+name: llama
+model:
+  pretrained_model_name_or_path: "/home/users/bencheng.liao/LinearVLMWrapper/weights/HoVLE"            #HoVLE模型权重配置文件
+  cache_dir: "/home/users/bencheng.liao/LinearVLMWrapper/distillvlm_cache_dir" # Set this to where you want to save checkpoint weights
+  return_dict: true
+  load_in_8bit: false
+  load_in_4bit: false
+  device_map: cpu
+  low_cpu_mem_usage: true
+  torch_dtype: bfloat16
+  attn_implementation: eager # eager  # so we can load attention weights
+  rope_theta: 10000.0
+
+attention:
+  attention_type: mamba2
+  attention_name: attention
+  feature_map: softmax_dim
+  feature_map_kwargs:
+    eps: 1e-12
+    # mlp: null  # to set
+    fullspace: true
+  layer_idx: null # to set
+  learned_kernel: untied_head_einsum
+  learned_kernel_kwargs:
+    feature_dim: 64
+    skip_connection: false
+    bias: false
+    zero_init: false
+  tie_qk_kernels: false
+  train_qk: false
+  mamba2:                               #用来配置mamba2内的一些处理细节（是否使用残差、qknorm、卷积）
+    use_D: false
+    use_qknorm: false
+    use_conv: true 
+    use_gnorm: true
+    use_A: true
+    inherit_qkv: true
+    mimic_init: false
+  stage1: false                         #用来配置训练stage
+  stage2: true
+  #softmax_attentions: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+

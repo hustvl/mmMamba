@@ -1,0 +1,65 @@
+dataset:
+  name: internvl_dataload
+  dataset_config:
+    conv_style: "internlm2-chat"      
+    meta_path: configs/dataset/VLM-SFT.json          #符合internvl的数据集配置文件
+    force_image_size: 448
+    max_dynamic_patch: 12  
+    min_dynamic_patch: 1
+    down_sample_ratio: 1
+    max_length: 8192
+    dynamic_image_size: True
+    normalize_type: "imagenet"
+    use_packed_ds: false
+    use_thumbnail: True
+    pad2square: false
+    use_data_resampling: false
+
+  pretrained_model_config:  # will be updated based on model_config
+    pretrained_model_name_or_path: 'meta-llama/Meta-Llama-3-8B'  
+    cache_dir: '/scratch/'
+  preprocess_config: null
+
+dataloader:
+  batch_size: 2
+  num_workers: 8
+  drop_last: false
+  pin_memory: true
+
+optimizer:
+  optim: adamw_torch_fused
+  lr: 0.0005                         #学习率
+  weight_decay: 0.0
+
+lr_scheduler:
+  lr_scheduler_type: reduce_lr_on_plateau
+  mode: min
+  factor: 0.1
+  patience: 10
+  min_lr: 0.00001
+  #lr_scheduler_type: linear
+  #num_warmup_steps: 200
+  #num_training_steps: 230000
+
+trainer:  # HuggingFace Trainer-like arguments  
+  name: distill_attention_xent_mse
+  reverse_kl: false
+  mse_factor: 1000
+  xent_factor: 0
+  bf16: true
+  train_split: train
+  val_split: validation
+  num_train_epochs: 1
+  gradient_accumulation_steps: 1
+  gradient_clip: -1
+  seed: 42
+  batch_size: 1
+  load_best_model_at_end: true
+  greater_is_better: false
+  metric_for_best_model: distill/eval/loss
+  logging_steps: 10
+  evaluation_strategy: steps
+  max_steps: 20000
+  eval_steps: 1000
+  max_eval_batches: 50
+  num_save_ckpt_steps: 5000
