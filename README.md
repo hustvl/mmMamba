@@ -17,7 +17,7 @@
 </div>
 
 ## News
-* **` Nov. 25th, 2024`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.XXXX). We release the initial version of [code]() and [weight]().
+* **` Nov. 25th, 2024`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.XXXX). We release the initial version of [code]() and [weight](https://huggingface.co/hustvl/mmMamba).
 
 
 ## Table of Contents
