@@ -10,14 +10,14 @@
 
 
 [![mmMamba](https://img.shields.io/badge/Paper-mmMamba-2b9348.svg?logo=arXiv)](https://arxiv.org/abs/2411.xxx)&nbsp;
-[![huggingface weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-mmMamba-yellow)](https://huggingface.co/hustvl/mmMamba)&nbsp;
-
+[![huggingface weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-mmMamba_linear-yellow)](https://huggingface.co/hustvl/mmMamba-linear)&nbsp;
+[![huggingface weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-mmMamba_hybrid-yellow)](https://huggingface.co/hustvl/mmMamba_hybrid)&nbsp;
 
 
 </div>
 
 ## News
-* **` Nov. 25th, 2024`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.XXXX). We release the initial version of [code]() and [weight](https://huggingface.co/hustvl/mmMamba).
+* **` Feb. XXth, 2025`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.XXXX). We release the initial version of code and weights.
 
 
 ## Table of Contents
