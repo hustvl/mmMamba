@@ -84,7 +84,10 @@ This README provides a step-by-step guide to evaluate the mmMamba model using In
 1. **Download the mmMamba Model Weights**
    - Download the mmMamba model weights from Hugging Face
 
-2. **Modify the InternVL Model Initialization**
+2. **Clone the InternVL Repository**
+   - Clone the [InternVL repository](https://github.com/internvl/internvl) and navigate to the `internvl_chat` directory.
+  
+3. **Modify the InternVL Model Initialization**
    - Change lines 46-48 in `internvl_chat/internvl/model/__init__.py` to:
      ```python
      model = AutoModel.from_pretrained(
@@ -94,8 +97,7 @@ This README provides a step-by-step guide to evaluate the mmMamba model using In
          trust_remote_code=True).eval()
      ```
 
-3. **Clone the InternVL Repository**
-   - Clone the [InternVL repository](https://github.com/internvl/internvl) and navigate to the `internvl_chat` directory.
+4. **Follow the evaluation process**
    - Follow the evaluation process outlined in the [InternVL2 Series Evaluation documentation](https://internvl.readthedocs.io/en/latest/internvl2.0/evaluation.html).
 
 #### Notes
