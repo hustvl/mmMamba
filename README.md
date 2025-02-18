@@ -50,7 +50,7 @@ Distilled from the decoder-only HoVLE-2.6B, our pure Mamba-2-based mmMamba-linea
 - [Usage](docs/usage.md)
 
 ## Acknowledgement
-mmMamba is greatly inspired by the following outstanding contributions to the open-source community: [mamba](https://github.com/state-spaces/mamba), [LolCATs](https://github.com/HazyResearch/lolcats), [phi-mamba](https://github.com/goombalab/phi-mamba), [MambaInLlama](https://github.com/jxiw/MambaInLlama), [HoVLE](https://huggingface.co/OpenGVLab/HoVLE), [SOLO](https://github.com/Yangyi-Chen/SOLO).
+mmMamba is greatly inspired by the following outstanding contributions to the open-source community: [mamba](https://github.com/state-spaces/mamba), [LolCATs](https://github.com/HazyResearch/lolcats), [phi-mamba](https://github.com/goombalab/phi-mamba), [MambaInLlama](https://github.com/jxiw/MambaInLlama), [HoVLE](https://huggingface.co/OpenGVLab/HoVLE), [SOLO](https://github.com/Yangyi-Chen/SOLO), [flash-linear-attention](https://github.com/fla-org/flash-linear-attention).
 
 ## Citation
 If you find mmMamba is useful in your research or applications, please consider giving us a star 🌟 and citing it by the following BibTeX entry.
