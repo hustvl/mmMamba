@@ -314,9 +314,9 @@ class Mamba2_Attention(nn.Module):
         if self.base_config is not None and self.rotary_config is None:
             self.rotary_emb = base_attn.rotary_emb
 
-        self.init_weights_(base_attn, remove_base_attn)
+        self.init_weights(base_attn, remove_base_attn)
 
-    def init_weights_(self, 
+    def init_weights(self, 
                       base_attn: nn.Module, 
                       remove_base_attn: bool = True,
                       elementwise_affine: Optional[bool] = True,
@@ -367,7 +367,7 @@ class Mamba2_Attention(nn.Module):
             self.q_proj = nn.Linear(self.hidden_size, self.num_q_heads, bias=False)
             self.k_proj = nn.Linear(self.hidden_size, self.num_kv_heads, bias=False)
             self.v_proj = nn.Linear(self.hidden_size, self.num_kv_heads, bias=False)
-            # import ipdb; ipdb.set_trace()
+
             if self.inherit_qkv:
                 self.q_proj.weight.data = self.q_weight
                 self.k_proj.weight.data = self.k_weight
@@ -398,8 +398,6 @@ class Mamba2_Attention(nn.Module):
                 if 'device' not in self.rotary_config:
                     self.rotary_config['device'] = self.device
                 self.rotary_emb = get_rotary_embeddings(**self.rotary_config)
-
-        # Copy original model projection layers
         
         try:  # If wanting to use FA2 for ground-truth inference
             self._flash_attn_uses_top_left_mask = base_attn._flash_attn_uses_top_left_mask
@@ -440,7 +438,7 @@ class Mamba2_Attention(nn.Module):
         ).to(self.dtype).to(self.device)
         if self.mimic_init: 
             nn.init.zeros_(self.in_proj.weight)
-        # import ipdb; ipdb.set_trace()
+
         if self.use_gnorm:
             self.g_norm = RMSNorm(hidden_size=self.head_dim, elementwise_affine=elementwise_affine, eps=norm_eps).to(self.dtype).to(self.device)
             self.g_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False, device=self.device, dtype=self.dtype)
@@ -533,10 +531,8 @@ class Mamba2_Attention(nn.Module):
         else:
             a = torch.softmax(a, dim=-1)
         y = torch.einsum('bhmn,bhnd->bhmd', a, v)
-        if not stage1:
-            a = None
-        #a = torch.sum(a, dim=1)#.unsqueeze(1)
-        return y, a, None
+        a = None
+        return y, a
 
     def forward(self,
                 hidden_states: torch.Tensor,
@@ -577,19 +573,12 @@ class Mamba2_Attention(nn.Module):
             k_shadow = k_shadow.view(b, l, *self.k_shape).transpose(1, 2)
             v_shadow = v_shadow.view(b, l, *self.v_shape).transpose(1, 2)
 
-
-        #-------------------------------------------------------------------
-        #gk = torch.zeros_like(q)
-        #gk = gk.to(self.dtype)
-        #-------------------------------------------------------------------
-
         if self.base_inference:
             with torch.no_grad():
                 # 1. Compute "ground-truth" attention output and weights
-                y_true, _, _ = self.softmax_attention(q, k, v, causal=True, position_ids=position_ids, past_key_value=past_key_value)
+                y_true, attn_true= self.softmax_attention(q, k, v, causal=True, position_ids=position_ids, past_key_value=past_key_value)
                 y_true = y_true.transpose(1, 2).contiguous().view(b, l, self.hidden_size)
                 y_true = self.o_proj(y_true)
-                attn_weights = (None, None)
 
         elif self.train_attention:  # Distilling / learning attentions
             # Note for now we assume no padding when distilling; attention masks only enforce causality
@@ -597,17 +586,15 @@ class Mamba2_Attention(nn.Module):
             with torch.no_grad():
                 # 1. Compute "ground-truth" attention output and weights
                 if self.train_stage == "1":
-                    _y_true, attn_true, _ = self.softmax_attention(q.clone(), k.clone(), v.clone(), causal=True, fp32_attention=False, stage1=self.stage1, stage2=self.stage2, position_ids=position_ids, past_key_value=past_key_value)
+                    _y_true, attn_true = self.softmax_attention(q.clone(), k.clone(), v.clone(), causal=True, fp32_attention=False, stage1=self.stage1, stage2=self.stage2, position_ids=position_ids, past_key_value=past_key_value)
                     y_true = _y_true.transpose(1, 2).contiguous().view(b, l, self.hidden_size)
                     y_true = self.o_proj(y_true)
-                    if not self.stage2:
-                        _y_true = None
+
                 else:
-                    _y_true, attn_true, _ = self.softmax_attention(q_shadow, k_shadow, v_shadow, causal=True, fp32_attention=False, stage1=self.stage1, stage2=self.stage2, position_ids=position_ids, past_key_value=past_key_value)
+                    _y_true, attn_true = self.softmax_attention(q_shadow, k_shadow, v_shadow, causal=True, fp32_attention=False, stage1=self.stage1, stage2=self.stage2, position_ids=position_ids, past_key_value=past_key_value)
                     y_true = _y_true.transpose(1, 2).contiguous().view(b, l, self.hidden_size)
                     y_true = self.o_proj(y_true)
-                    if not self.stage2:
-                        _y_true = None
+
 
             u = hidden_states
             batch, seqlen, dim = u.shape
@@ -658,49 +645,41 @@ class Mamba2_Attention(nn.Module):
 
             dt = self.in_proj(u)
 
-            if self.stage2:
-                if self.use_A:
-                    A = -torch.exp(self.A_log_bias.float())
-                else:
-                    A = -torch.ones(self.num_heads, device=dt.device)
-                y = mamba_chunk_scan_combined(
-                    x =v,
-                    #x=v / F.softplus(A_log).to(v.dtype).unsqueeze(-1), 
-                    dt=dt,
-                    dt_softplus=True,
-                    A=A,
-                    #A=-torch.ones(self.num_heads, device=dt.device),
-                    B=k,
-                    C=q,
-                    chunk_size=self.chunk_size,
-                    dt_bias=self.dt_bias,
-                    # initial_states=(state["ssm"] if state is not None else None), # currently not supported by mamba_ssm.utils.generation
-                    return_final_states=False,
-                )
-
-                if self.use_D:
-                    Du = torch.einsum("h,blhp->blhp", self.D, v)
-                    y = y + Du
-                if self.use_gnorm:
-                    y_pred = self.g_norm(y)
-                    g = self.g_proj(hidden_states)
-                    g = rearrange(g, 'b l (h d) -> b l h d', h=self.num_heads)
-                    y_pred = y_pred * self.gate_fn(g)  
-                    
-                else:
-                    y_pred = y
-                y_pred = rearrange(y_pred, 'b l h d -> b h l d')
+            if self.use_A:
+                A = -torch.exp(self.A_log_bias.float())
             else:
-                y_pred = None
+                A = -torch.ones(self.num_heads, device=dt.device)
+            y = mamba_chunk_scan_combined(
+                x =v,
+                #x=v / F.softplus(A_log).to(v.dtype).unsqueeze(-1), 
+                dt=dt,
+                dt_softplus=True,
+                A=A,
+                #A=-torch.ones(self.num_heads, device=dt.device),
+                B=k,
+                C=q,
+                chunk_size=self.chunk_size,
+                dt_bias=self.dt_bias,
+                # initial_states=(state["ssm"] if state is not None else None), # currently not supported by mamba_ssm.utils.generation
+                return_final_states=False,
+            )
 
-            if self.stage1:
-                attn_pred = materialize_mixer(
-                    A_log=dt, B=k, C=q, D=None
-                )[..., :seqlen, :seqlen]
+            if self.use_D:
+                Du = torch.einsum("h,blhp->blhp", self.D, v)
+                y = y + Du
+            if self.use_gnorm:
+                y_pred = self.g_norm(y)
+                g = self.g_proj(hidden_states)
+                g = rearrange(g, 'b l (h d) -> b l h d', h=self.num_heads)
+                y_pred = y_pred * self.gate_fn(g)  
+                
             else:
-                attn_pred = None
+                y_pred = y
+            y_pred = rearrange(y_pred, 'b l h d -> b h l d')
 
-        else:  # Finetuning
+            attn_pred = None
+
+        else:  # Stage3
             u = hidden_states
             batch, seqlen, dim = u.shape
             v = rearrange(v, "b h l n -> b l h n", h=self.num_key_value_heads)

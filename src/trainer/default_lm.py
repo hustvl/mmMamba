@@ -111,7 +111,7 @@ class OurTrainer():
         self.eval_metrics = {metric_for_best_model: None}
         self.eval_metrics_by_step = {'eval_step': []}  # save all eval metrics
         self.criterion = nn.CrossEntropyLoss(reduction='mean',ignore_index=-100)#------------------------------------------
-        self.loss_fn = FinetuneLoss(self.model.module.config.llm_config, temperature=1.0, alpha=1.0)
+        self.loss_fn = EndtoEnd(self.model.module.config.llm_config, temperature=1.0, alpha=1.0)
         try:
             self.tokenizer = self.train_loader.dataset.tokenizer
         except AttributeError:
@@ -199,8 +199,8 @@ class OurTrainer():
             
             with self.accelerator.accumulate(model):
                 if data is None or data["input_ids"].shape[-1] > self.max_length:
-                    print("nonono")
-                    self.logger.warning("nonono")
+                    print("data warning! skip this round")
+                    self.logger.warning("data warning! skip this round")
                     num_delete += 1
                     continue
 
@@ -304,19 +304,6 @@ class OurTrainer():
             if self.accelerator.is_main_process:
                 for k, v in self.eval_metrics.items():
                     self.tensorboard_writer.add_scalar(k, v, self.grad_step)
-
-
-            """if self.results_path is not None:  # log to local file
-                self.eval_metrics_by_step['eval_step'].append(step)
-                for k, v in self.eval_metrics.items():
-                    if k not in self.eval_metrics_by_step:
-                        self.eval_metrics_by_step[k] = [v]
-                    else:
-                        self.eval_metrics_by_step[k].append(v)
-                # Inefficient, but log for experiments results
-                pd.DataFrame(self.eval_metrics_by_step).to_csv(self.results_path)"""
-
-            #self.best_val_checkpoint_path='./checkpoints_mamba2/2_distill.pt'
 
             unwrapped_model = self.accelerator.unwrap_model(model)
 
@@ -475,9 +462,9 @@ class OurTrainer():
             if 'eval' not in self.metric_for_best_model:
                 self.metric_for_best_model = f'eval/{self.metric_for_best_model}'
 
-class FinetuneLoss(nn.Module):
+class EndtoEnd(nn.Module):
     def __init__(self, config, temperature=2.0, alpha=1.0):
-        super(FinetuneLoss, self).__init__()
+        super(EndtoEnd, self).__init__()
         self.temperature = temperature
         self.alpha = alpha
         self.config = config

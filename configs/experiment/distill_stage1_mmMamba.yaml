@@ -28,7 +28,7 @@ dataloader:
 
 optimizer:
   optim: adamw_torch_fused
-  lr: 0.0005                         #学习率
+  lr: 0.0005                         
   weight_decay: 0.0
 
 lr_scheduler:
@@ -42,7 +42,7 @@ lr_scheduler:
   #num_training_steps: 230000
 
 trainer:  # HuggingFace Trainer-like arguments  
-  name: distill_attention_xent_mse
+  name: distill_every_layer
   reverse_kl: false
   mse_factor: 1000
   xent_factor: 0
@@ -63,3 +63,4 @@ trainer:  # HuggingFace Trainer-like arguments
   eval_steps: 1000
   max_eval_batches: 50
   num_save_ckpt_steps: 5000
+

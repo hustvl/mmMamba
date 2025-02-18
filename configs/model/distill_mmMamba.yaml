@@ -1,0 +1,30 @@
+name: mmMamba
+model:
+  pretrained_model_name_or_path: "./weights/HoVLE"         
+  cache_dir: "./distillvlm_cache_dir" # Set this to where you want to save checkpoint weights
+  return_dict: true
+  load_in_8bit: false
+  load_in_4bit: false
+  device_map: cpu
+  low_cpu_mem_usage: true
+  torch_dtype: bfloat16
+  attn_implementation: eager # eager  # so we can load attention weights
+  rope_theta: 10000.0
+
+attention:
+  attention_type: mamba2
+  attention_name: attention
+  layer_idx: null # to set
+  tie_qk_kernels: false
+  train_qk: false
+  mamba2:                               #Used for configuring some processing details within Mamba2 (whether to use residuals, QKNorm, and convolution).
+    use_D: false
+    use_qknorm: false
+    use_conv: true 
+    use_gnorm: true
+    use_A: true
+    inherit_qkv: true
+    mimic_init: true
+  stage1: false                         #Used for configuring whether to align the attention matrix
+  stage2: true
+

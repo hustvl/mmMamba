@@ -47,7 +47,6 @@ class OurTrainer(DefaultTrainer):
         # n_layers x (predicted_attns, true_attns)
         # predicted_attns and true_attns are shape (batch, n_heads, q_len, k_len)
         loss_mse = 0
-        loss_xent = 0
         n_layers = 0  # Number of layers to distill
         softmax_layers = []
         for layer_idx, attns in enumerate(outputs):
@@ -55,26 +54,14 @@ class OurTrainer(DefaultTrainer):
                 if len(attns) != 2:
                     attns = attns.cpu()
                 else:
-                    if self.xent_factor > 0:
-                        # Cross-entropy loss
-                        a_pred, a_true = attns[0]
-                        loss_xent += torch.linalg.matrix_norm(
-                                a_pred - a_true, ord="fro"
-                            ).mean()
-                    if self.mse_factor > 0:
-                        if attns[1][0] is not None:
-                            loss_mse += self.criterion_mse(attns[1][0], attns[1][1])
-                            n_layers += 1
-                            #loss_mse += self.criterion_mse(attns[1][0][:, :, data["num_patches"]:, :], attns[1][1][:, :, data["num_patches"]:, :])
-                        else:
-                            loss_mse += 0 
-                        #loss_mse += self.criterion_mse(attns[1][0], attns[1][1])                  
+                    if attns[1][0] is not None:
+                        loss_mse += self.criterion_mse(attns[1][0], attns[1][1])
+                        n_layers += 1              
             else:
                 softmax_layers.append(layer_idx)
         if n_layers > 0:
-            loss_xent = loss_xent / n_layers * self.xent_factor
             loss_mse = loss_mse / n_layers * self.mse_factor
-        loss = loss_xent + loss_mse
+        loss = loss_mse
         """if 'position_ids' in data:
             outputs = {'loss_xent': loss_xent.item() if self.xent_factor > 0 else 0,
                        'loss_mse': loss_mse.item() if self.mse_factor > 0 else 0,
@@ -83,8 +70,7 @@ class OurTrainer(DefaultTrainer):
                        'mse_factor': self.mse_factor,
                        'xent_factor': self.xent_factor,}
         else:"""
-        outputs = {'loss_xent': loss_xent.item() if self.xent_factor > 0 else 0,
-                    'loss_mse': loss_mse.item() if self.mse_factor > 0 else 0, 
+        outputs = { 'loss_mse': loss_mse.item() if self.mse_factor > 0 else 0, 
                     'mse_factor': self.mse_factor, 
                     'xent_factor': self.xent_factor}
         return loss, outputs

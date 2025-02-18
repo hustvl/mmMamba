@@ -59,13 +59,8 @@ trainer: # HuggingFace Trainer-like arguments
   eval_steps: 100
   max_eval_batches: 200
 
-finetune:
+distill_stage3:
   method: full           #采用qk全量微调
-  kwargs:
-    r: 8
-    lora_alpha: 16
-    lora_dropout: 0 # 0.05
-    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
   trainable_weights: ["attention.g_proj", 
                        "attention.in_proj", 
                        "attention.conv",
@@ -80,5 +75,4 @@ finetune:
                       #  "attention.v_proj",
                       #  "attention.o_proj",
                        ]
-  softmax_attention_language: [0,4,8,12,16,20]
-  softmax_attention_embedding: [0,4]
+  softmax_attention: [0,4,8,12,16,20,24,28]

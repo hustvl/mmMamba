@@ -1,7 +1,7 @@
 {
   "VLM_SFT_170k": {
-    "root": "/home/users/bencheng.liao/LinearVLMWrapper/unzipped_data/VLM-SFT/images",
-    "annotation": "/home/users/bencheng.liao/LinearVLMWrapper/unzipped_data/VLM-SFT/all_data.jsonl",
+    "root": "./data/vlm_sft/images",
+    "annotation": "./data/vlm_sft/all_data.jsonl",
     "data_augment": false,
     "repeat_time": 1,
     "length": 1701560   
