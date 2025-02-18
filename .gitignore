@@ -44,7 +44,6 @@ MANIFEST
 *graph*
 
 #some file
-configs/accelerate/
 configs/experiment/*alpaca* 
 configs/model/*llama3* 
 configs/model/*mistral* 
