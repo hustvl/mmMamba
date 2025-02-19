@@ -17,7 +17,7 @@
 </div>
 
 ## News
-* **` Feb. XXth, 2025`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.13145). We release the initial version of code and weights.
+* **` Feb. 19th, 2025`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.13145). We release the initial version of code and weights.
 
 
 ## Table of Contents
