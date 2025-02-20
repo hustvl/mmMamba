@@ -9,7 +9,7 @@
 <sup>*</sup> equal contribution, <sup>:email:</sup> corresponding author, xgwang@hust.edu.cn
 
 
-[![mmMamba](https://img.shields.io/badge/Paper-mmMamba-2b9348.svg?logo=arXiv)](https://arxiv.org/abs/2411.xxx)&nbsp;
+[![mmMamba](https://img.shields.io/badge/Paper-mmMamba-2b9348.svg?logo=arXiv)](https://arxiv.org/abs/2502.13145)&nbsp;
 [![huggingface weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-mmMamba_linear-yellow)](https://huggingface.co/hustvl/mmMamba-linear)&nbsp;
 [![huggingface weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-mmMamba_hybrid-yellow)](https://huggingface.co/hustvl/mmMamba_hybrid)&nbsp;
 
@@ -17,7 +17,7 @@
 </div>
 
 ## News
-* **` Feb. XXth, 2025`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.XXXX). We release the initial version of code and weights.
+* **` Feb. 19th, 2025`:** We released our paper on [Arxiv](https://arxiv.org/abs/2502.13145). We release the initial version of code and weights.
 
 
 ## Table of Contents
@@ -59,7 +59,7 @@ If you find mmMamba is useful in your research or applications, please consider 
  @article{mmMamba,
   title={mmMamba: Decoder-only Multimodal State Space Model via Quadratic to Linear Distillation},
   author={Bencheng Liao and Hongyuan Tao and Qian Zhang and Tianheng Cheng and Yingyue Li and Haoran Yin and Wenyu Liu and Xinggang Wang},
-  journal={arXiv preprint arXiv:2502.XXXXX},
+  journal={arXiv preprint arXiv:2502.13145},
   year={2025}
 }
 ```
