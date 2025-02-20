@@ -42,7 +42,7 @@ lr_scheduler:
   #num_training_steps: 230000
 
 trainer:  # HuggingFace Trainer-like arguments  
-  name: distill_attention_xent_mse
+  name: distill_every_layer
   reverse_kl: false
   mse_factor: 1000
   xent_factor: 0

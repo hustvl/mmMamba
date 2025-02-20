@@ -183,14 +183,6 @@ def update_model_config_from_args(model_config: DictConfig,
                 getattr(model_config['attention'], arg)
             except AttributeError:
                 setattr(model_config['attention'], arg, None)
-
-    # Learned kernel
-    for arg in ['lk_skip_connection', 'lk_zero_init', 'lk_normal_init']:
-        argval = getattr(args, arg, None)
-        if argval is not None:
-            setattr(model_config['attention']['learned_kernel_kwargs'], 
-                    arg[len('lk_'):], argval)
-            args.run_name += f'-{_format_arg(arg)}={argval}'
             
     # Pretrained model
     if args.pretrained_model_name_or_path is not None:  # if specified 

@@ -1,6 +1,6 @@
 name: mmMamba
 model:
-  pretrained_model_name_or_path: "./weights/HoVLE"         
+  pretrained_model_name_or_path: "/path/to/HoVLE"         
   cache_dir: "./distillvlm_cache_dir" # Set this to where you want to save checkpoint weights
   return_dict: true
   load_in_8bit: false

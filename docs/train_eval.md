@@ -26,11 +26,22 @@ Our code includes a three-stage training process. You can switch between differe
 
 - `--checkpoint_dir` : Path to store the distillation checkpoint.
 
-Here is a command-line example for performing a three-stage training process step by step. You can modify the content in the script according to your training requirements.
+
+Our code currently supports training in phases and does not support completing the entire training process in one go. You can specify which phase of training to execute by providing command-line arguments. Checkpoints will be periodically saved during each phase of training. Below are the script commands for executing the three phases of training:
 
 ```bash
-bash parallel.sh
+bash scripts/distill_stage1.sh
 ```
+```bash
+bash scripts/distill_stage2.sh
+```
+```bash
+bash scripts/distill_stage2.sh
+```
+#### Notes
+- The --load_distill_checkpoint in the script is optional and is used to import an existing checkpoint. Please replace it with the corresponding ckpt path.
+- In Stage 1 and Stage 2, all layers of the model are replaced with Mamba2 and aligned through distillation. 
+- In Stage 3, you can determine which layers to retain as the original multi-head attention layers by customizing the `distill_stage3/softmax_attention` list in `configs/experiment/distill_stage3_mmMamba.yaml` to train the mmMamba-Hybrid model.
 
 ## Evaluation
 

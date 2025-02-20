@@ -36,6 +36,7 @@ MANIFEST
 
 #checkpoints
 *checkpoints*/
+*vscode*/
 
 #attention_matrix
 *attention_matrix*

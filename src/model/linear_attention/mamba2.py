@@ -233,12 +233,8 @@ class Mamba2_Attention(nn.Module):
     """
     def __init__(self,
                  base_attn: nn.Module,  # like LlamaAttention
-                 feature_map: str,
-                 feature_map_kwargs: dict,
                  layer_idx: Optional[int] = None,
                  max_layer_idx: Optional[int] = None,
-                 learned_kernel: Optional[str] = None,
-                 learned_kernel_kwargs: Optional[dict] = None,
                  tie_qk_kernels: Optional[bool] = False,
                  rotary_config: Optional[dict] = None,
                  train_attention: Optional[bool] = False,
@@ -293,16 +289,7 @@ class Mamba2_Attention(nn.Module):
         self.activation="silu"
         self.train_stage="1"
 
-        if rank == 0:  # multi-gpu
-            if fp32_attention and layer_idx == 0:
-                print(f'-> fp32_attention is {fp32_attention}')
-            if layer_idx == 0 and feature_map_kwargs is not None:
-                for k, v in feature_map_kwargs.items():
-                    print(f'-> {k}: {v}')
-            if layer_idx == 0 and learned_kernel_kwargs is not None:
-                for k, v in learned_kernel_kwargs.items():
-                    print(f'-> {k}: {v}')
-                    
+
         self.remove_base_attn = remove_base_attn
 
         # Rotary embeddings (patch for Llama 3.1, Transformer v4.43.0)

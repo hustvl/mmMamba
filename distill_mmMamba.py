@@ -51,10 +51,6 @@ def get_args():
     # Override default configs
     # Feature map / model
     parser.add_argument("--attention_type", type=str, default=None)
-    parser.add_argument("--learned_kernel", type=str, default=None)  # always
-    parser.add_argument("--lk_skip_connection", action='store_true', default=None)
-    parser.add_argument("--lk_zero_init", action='store_true', default=None)
-    parser.add_argument("--lk_normal_init", action='store_true', default=None)
     parser.add_argument("--tie_qk_kernels", action='store_true', default=None)
     parser.add_argument("--train_qk", action='store_true', default=None)
     parser.add_argument("--state_chunk_len", type=int, default=None)
@@ -114,58 +110,14 @@ def main():
     seed_everything(args.seed)
     args.device = torch.device('cuda')
     logger.info(args)
-    # Load distillation + (hedgehog) attention configs
-    distill_stage1_config_path = join('./configs/experiment', f'{args.distill_stage1_config}.yaml')
-    distill_stage1_config = OmegaConf.load(distill_stage1_config_path)
-    distill_stage1_config = update_config_from_args(distill_stage1_config, args)
-
-    distill_stage2_config_path = join('./configs/experiment', f'{args.distill_stage2_config}.yaml')
-    distill_stage2_config = OmegaConf.load(distill_stage2_config_path)
-    distill_stage2_config = update_config_from_args(distill_stage2_config, args)
-
-    distill_stage3_config_path = join('./configs/experiment', f'{args.distill_stage3_config}.yaml')
-    distill_stage3_config = OmegaConf.load(distill_stage3_config_path)
-    distill_stage3_config = update_config_from_args(distill_stage3_config, args)
+    # Load model configs
 
     model_config_path = join('./configs/model', f'{args.model_config}.yaml')
     model_config = OmegaConf.load(model_config_path)
     model_config = update_model_config_from_args(model_config, args)
     
-    args.run_name = args.run_name.replace('True', '1').replace('False', '0')  # concise hacks
-        
-    # Update data tokenizer to match model
-    for k in ['pretrained_model_name_or_path', 'cache_dir']:
-        distill_stage1_config.dataset.pretrained_model_config[k] = model_config.model[k]
-        distill_stage2_config.dataset.pretrained_model_config[k] = model_config.model[k]
-        distill_stage3_config.dataset.pretrained_model_config[k] = model_config.model[k]
-
-    # Update optimizer if specified
-    if 'optimizer' in model_config:
-        for k, v in model_config.optimizer.items():
-            distill_stage1_config.optimizer[k] = v
-    accelerator = Accelerator(gradient_accumulation_steps=distill_stage1_config.trainer.gradient_accumulation_steps, log_with="wandb")
-    if accelerator.is_main_process:
-        print_header('Distillation Config', logger=logger)
-        print_config(distill_stage1_config, logger=logger)
-        print_config(distill_stage2_config, logger=logger)
-        print_config(distill_stage3_config, logger=logger)
-        print_header('Model Config', logger=logger)
-        print_config(model_config, logger=logger)
-
     # WandB logging
     wandb = init_wandb(args)
-    
-    if wandb is not None:
-        distill_stage1_config['model'] = model_config  # Combine for logging
-        _flattened = {'model': model_config,
-                      'model_config': args.model_config,  # config file names
-                      'distill_stage1_config': args.distill_stage1_config,
-                      'distill_stage2_config': args.distill_stage2_config,
-                      'distill_stage3_config': args.distill_stage3_config,
-                      'distill_checkpoint': args.load_distill_checkpoint,
-                      'replicate': args.replicate}
-        flatten_config(OmegaConf.to_container(distill_stage1_config), _flattened, '')
-        wandb.config.update(_flattened)
 
     # Get pretrained model
     if 'HoVLE' in model_config.model.pretrained_model_name_or_path:
@@ -189,27 +141,55 @@ def main():
     except AttributeError:
         args.attention_type = 'mamba2'
 
-    if args.verbose and accelerator.is_main_process:
+    if args.verbose:
         print_header('*** Initial Model ***', logger=logger)
         logger.info(f"Model: {model}")
+
     checkpoint_path = None
     distill_done = False
 
     # --------
     # TRAINING
     # --------
-    if (args.distill_stage3_config is not None):
-        distill_stage3_config, args = prepare_stage3_configs(args, model_config,
-                                                        args.distill_stage3_config)
-    else:
-        distill_stage3_config = None
 
-    
-    if args.train_stage1 and (args.load_distill_checkpoint is None or args.resume_distill_stage1): 
+    if args.train_stage1: 
+        distill_stage1_config_path = join('./configs/experiment', f'{args.distill_stage1_config}.yaml')
+        distill_stage1_config = OmegaConf.load(distill_stage1_config_path)
+        distill_stage1_config = update_config_from_args(distill_stage1_config, args)
+
+        args.run_name = args.run_name.replace('True', '1').replace('False', '0')  # concise hacks
+
+        # Update data tokenizer to match model
+        for k in ['pretrained_model_name_or_path', 'cache_dir']:
+            distill_stage1_config.dataset.pretrained_model_config[k] = model_config.model[k]
+
+        # Update optimizer if specified
+        if 'optimizer' in model_config:
+            for k, v in model_config.optimizer.items():
+                distill_stage1_config.optimizer[k] = v
+
+        accelerator = Accelerator(gradient_accumulation_steps=distill_stage1_config.trainer.gradient_accumulation_steps, log_with="wandb")
+
+        if wandb is not None:
+            distill_stage1_config['model'] = model_config  # Combine for logging
+            _flattened = {'model': model_config,
+                        'model_config': args.model_config,  # config file names
+                        'distill_stage1_config': args.distill_stage1_config,
+                        'distill_checkpoint': args.load_distill_checkpoint,
+                        'replicate': args.replicate}
+            flatten_config(OmegaConf.to_container(distill_stage1_config), _flattened, '')
+            wandb.config.update(_flattened)
+
+        if accelerator.is_main_process:
+            print_header('Distillation Config', logger=logger)
+            print_config(distill_stage1_config, logger=logger)
+            print_header('Model Config', logger=logger)
+            print_config(model_config, logger=logger)
+
+
         checkpoint_path = args.load_distill_checkpoint
         model = load_and_convert_attns(model, model_config,
                                         accelerator=accelerator,
-                                        distill_stage3_config=distill_stage3_config,
                                         logger=logger,
                                         attention_type=args.attention_type, 
                                         checkpoint_path=checkpoint_path, 
@@ -309,21 +289,49 @@ def main():
             model = toggle_attention(model, train=False)
             if not args.train_stage2:
                 model = remove_base_attention(model)
-            if ('peft_config' in model_config['attention'] or 'peft' in model_config['attention']):
-                model = model.merge_and_unload()
 
             args.load_distill_checkpoint = trainer.last_val_checkpoint_path
-            args.resume_distill_stage2 = True
             print_info = "Done distilling all stage 1"
             print(print_info) if logger is None else logger.info(print_info)
             distill_done = True
+            os._exit(0)
+            sys.exit(0)
     
-    if args.train_stage2 and (args.load_distill_checkpoint is None or args.resume_distill_stage2): 
-        if args.load_distill_checkpoint == 'default':  # lazy identifier
-            checkpoint_path = f'{join(args.checkpoint_dir, args.run_name)}_distill.pt'
-        else:
-            checkpoint_path = args.load_distill_checkpoint
-        
+    if args.train_stage2: 
+        distill_stage2_config_path = join('./configs/experiment', f'{args.distill_stage2_config}.yaml')
+        distill_stage2_config = OmegaConf.load(distill_stage2_config_path)
+        distill_stage2_config = update_config_from_args(distill_stage2_config, args)
+
+        args.run_name = args.run_name.replace('True', '1').replace('False', '0')  # concise hacks
+
+        # Update data tokenizer to match model
+        for k in ['pretrained_model_name_or_path', 'cache_dir']:
+            distill_stage2_config.dataset.pretrained_model_config[k] = model_config.model[k]
+
+        # Update optimizer if specified
+        if 'optimizer' in model_config:
+            for k, v in model_config.optimizer.items():
+                distill_stage2_config.optimizer[k] = v
+
+        accelerator = Accelerator(gradient_accumulation_steps=distill_stage2_config.trainer.gradient_accumulation_steps, log_with="wandb")
+
+        if wandb is not None:
+            distill_stage2_config['model'] = model_config  # Combine for logging
+            _flattened = {'model': model_config,
+                        'model_config': args.model_config,  # config file names
+                        'distill_stage2_config': args.distill_stage2_config,
+                        'distill_checkpoint': args.load_distill_checkpoint,
+                        'replicate': args.replicate}
+            flatten_config(OmegaConf.to_container(distill_stage2_config), _flattened, '')
+            wandb.config.update(_flattened)
+
+        if accelerator.is_main_process:
+            print_header('Distillation Config', logger=logger)
+            print_config(distill_stage2_config, logger=logger)
+            print_header('Model Config', logger=logger)
+            print_config(model_config, logger=logger)
+
+        checkpoint_path = args.load_distill_checkpoint
         model = load_and_convert_attns_shadow(model, model_config,
                                                 accelerator=accelerator,
                                                 attention_type=args.attention_type, 
@@ -340,7 +348,6 @@ def main():
         train_loader = dataloaders[distill_stage2_config.trainer.train_split]
         eval_loader  = dataloaders[distill_stage2_config.trainer.val_split]
 
-        # import ipdb; ipdb.set_trace()
         optimizer = get_optimizer(model=model, **distill_stage2_config.optimizer)
         for key, value in dict(distill_stage2_config.lr_scheduler).items():
             if 'step' in key and isinstance(value, (int, float)):
@@ -404,21 +411,52 @@ def main():
         # Prepare for downstream distill_stage3 / eval
         model = toggle_attention(model, train=False)
         model = remove_base_attention(model)
-        if ('peft_config' in model_config['attention'] or 'peft' in model_config['attention']):
-            model = model.merge_and_unload()
 
         args.load_distill_checkpoint = trainer.best_val_checkpoint_path
-        args.resume_distill_stage3 = True
         print_info = "Done distilling stage 2"
         print(print_info) if logger is None else logger.info(print_info)
         distill_done = True
+        os._exit(0)
+        sys.exit(0)
 
 
-    if arg.train_stage3 and (args.load_distill_checkpoint is None or args.resume_distill_stage3):
-        if args.load_distill_checkpoint == 'default':  # lazy identifier
-            checkpoint_path = f'{join(args.checkpoint_dir, args.run_name)}_distill.pt'
-        else:
-            checkpoint_path = args.load_distill_checkpoint
+    if args.train_stage3:
+        distill_stage3_config_path = join('./configs/experiment', f'{args.distill_stage3_config}.yaml')
+        distill_stage3_config = OmegaConf.load(distill_stage3_config_path)
+        distill_stage3_config = update_config_from_args(distill_stage3_config, args)
+
+        args.run_name = args.run_name.replace('True', '1').replace('False', '0')  # concise hacks
+
+        # Update data tokenizer to match model
+        for k in ['pretrained_model_name_or_path', 'cache_dir']:
+            distill_stage3_config.dataset.pretrained_model_config[k] = model_config.model[k]
+
+        # Update optimizer if specified
+        if 'optimizer' in model_config:
+            for k, v in model_config.optimizer.items():
+                distill_stage3_config.optimizer[k] = v
+
+        accelerator = Accelerator(gradient_accumulation_steps=distill_stage3_config.trainer.gradient_accumulation_steps, log_with="wandb")
+
+        if wandb is not None:
+            distill_stage3_config['model'] = model_config  # Combine for logging
+            _flattened = {'model': model_config,
+                        'model_config': args.model_config,  # config file names
+                        'distill_stage3_config': args.distill_stage3_config,
+                        'distill_checkpoint': args.load_distill_checkpoint,
+                        'replicate': args.replicate}
+            flatten_config(OmegaConf.to_container(distill_stage3_config), _flattened, '')
+            wandb.config.update(_flattened)
+
+        if accelerator.is_main_process:
+            print_header('Distillation Config', logger=logger)
+            print_config(distill_stage3_config, logger=logger)
+            print_header('Model Config', logger=logger)
+            print_config(model_config, logger=logger)
+
+        distill_stage3_config, args = prepare_stage3_configs(args, model_config, args.distill_stage3_config)
+
+        checkpoint_path = args.load_distill_checkpoint
         
         teacher_model = InternVLChatModel.from_pretrained(
             model_config.model.pretrained_model_name_or_path,
@@ -459,7 +497,7 @@ def main():
                                             logger=logger)
 
         if args.verbose and accelerator.is_main_process:
-            print_header(f'*** Final Trainable finetuning parameters ***', logger=logger)
+            print_header(f'*** Final Trainable distill_stage3 parameters ***', logger=logger)
             for n, p in model.named_parameters():
                 if p.requires_grad:
                     print(f'├── {n} ({p.dtype})') if logger is None else logger.info(f'├── {n} ({p.dtype})')
@@ -469,12 +507,19 @@ def main():
             print_header('distill_stage3 config', logger=logger)
             print_config(distill_stage3_config, logger=logger)
         # Log some stats
+
+        if accelerator.is_main_process:  # Look at model
+                print_header('*** Distill Trainable Parameters ***', logger=logger)
+                for n, p in model.named_parameters():
+                    if p.requires_grad:
+                        print(f'├── {n} (dtype = {p.dtype})') if logger is None else logger.info(f'├── {n} (dtype = {p.dtype})')
+                        
         distill_stage3_config.model_train_params = count_parameters(model, requires_grad=True)
         distill_stage3_config.model_total_params = count_parameters(model, requires_grad=False)
         pct_trainable = distill_stage3_config.model_train_params / distill_stage3_config.model_total_params
     
         if accelerator.is_main_process:
-            print_header('*** Finetuning Parameter Counts ***', logger=logger)
+            print_header('*** Distill_stage3 Parameter Counts ***', logger=logger)
             print_info = f'├── Number training to distill:  {distill_stage3_config.model_train_params}'
             print(print_info) if logger is None else logger.info(print_info)
             print_info = f'├── Number of total parameters:  {distill_stage3_config.model_total_params}'
@@ -482,18 +527,18 @@ def main():
             print_info = f'├── Percent training to distill: {pct_trainable * 100:.3f}%'
             print(print_info) if logger is None else logger.info(print_info)
         if accelerator.is_main_process:
-            print_header('*** Finetuning all***', logger=logger)
+            print_header('*** Distill_stage3 all***', logger=logger)
             print_info = f'├── Experiment name: {args.run_name}'
             print(print_info) if logger is None else logger.info(print_info)
             print_info = f'├── Device: {args.device}'
             print(print_info) if logger is None else logger.info(print_info)
             print_info = f'├── Seed: {args.seed}'
             print(print_info) if logger is None else logger.info(print_info)
-            print_info = f'├── Begin Finetuning by loading weights from {args.load_distill_checkpoint}...'
+            print_info = f'├── Begin distill_stage3 by loading weights from {args.load_distill_checkpoint}...'
             print(print_info) if logger is None else logger.info(print_info)
         model = distill_stage3_trainer.train()
         args.load_distill_checkpoint = distill_stage3_trainer.best_val_checkpoint_path
-        print_info = "Done finetuning"
+        print_info = "Done distill_stage3"
         print(print_info) if logger is None else logger.info(print_info)
         os._exit(0)
         sys.exit(0)

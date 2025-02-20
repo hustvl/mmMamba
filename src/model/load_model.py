@@ -6,7 +6,7 @@ import torch.nn as nn
 from omegaconf import OmegaConf
 
 from src.utils.logging import print_header, _format_arg
-from .convert_model import convert_attention, convert_attention_shadow, convert_embedding_attention, convert_embedding_attention_shadow
+from .convert_model import convert_attention, convert_attention_shadow
 from .peft import create_peft_config
 from accelerate import Accelerator
 
@@ -164,7 +164,7 @@ def load_and_convert_distill_stage3(model: nn.Module,
             for n, p in model.named_parameters():
                 if name in n and "embedding_model" in n: 
                     if 'softmax_attention' in distill_stage3_config.distill_stage3:
-                        layer = int(n.split('layers.')[-1].split('.')[0])
+                        layer = int(n.split('encoder.')[-1].split('.')[0])
                         if layer not in distill_stage3_config.distill_stage3['softmax_attention']:
                             p.requires_grad = True
                     else:

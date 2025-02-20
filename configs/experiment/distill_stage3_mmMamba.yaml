@@ -72,7 +72,8 @@ distill_stage3:
                        "attention.g_norm",
                        "attention.q_proj",
                        "attention.k_proj",
-                      #  "attention.v_proj",
+                       "attention.v_proj",
                       #  "attention.o_proj",
                        ]
-  softmax_attention: [0,4,8,12,16,20,24,28]
+  softmax_attention: [0,4,8,12,16,20,24,28]  #train mmMamba-hybrid
+  #softmax_attention: []  #train mmMamba-linear

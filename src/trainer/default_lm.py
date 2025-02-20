@@ -111,7 +111,7 @@ class OurTrainer():
         self.eval_metrics = {metric_for_best_model: None}
         self.eval_metrics_by_step = {'eval_step': []}  # save all eval metrics
         self.criterion = nn.CrossEntropyLoss(reduction='mean',ignore_index=-100)#------------------------------------------
-        self.loss_fn = EndtoEnd(self.model.module.config.llm_config, temperature=1.0, alpha=1.0)
+        self.loss_fn = EndtoEnd(self.model.config.llm_config, temperature=1.0, alpha=1.0)
         try:
             self.tokenizer = self.train_loader.dataset.tokenizer
         except AttributeError:

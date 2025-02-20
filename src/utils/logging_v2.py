@@ -35,8 +35,8 @@ def get_logger(name: str = None, log_dir: str = None) -> logging.Logger:
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
         
-        if 'RANK' in os.environ and int(os.environ['RANK']) == 0:
-            logger.setLevel(logging.INFO)
+        #if 'RANK' in os.environ and int(os.environ['RANK']) == 0:
+        logger.setLevel(logging.INFO)
         
     return logger
 

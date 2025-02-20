@@ -1,8 +1,63 @@
-# Quick Start Guide for mmMamba Inference
+# Post-training Weight Converting and Inference with Transformers
+## Post-training Weight Converting
+
+After the training is completed, you need to perform the final step to convert your saved checkpoint into Hugging Face model weight files. 
+
+This guide provides instructions for converting model weights using the provided script `convert_weight.py`. This process is essential for preparing your model for deployment or further inference.
+
+### Usage
+
+To convert model weights, use the following command:
+
+```python
+python convert_weight.py \
+      --teacher_path "path/to/HoVLE"  \
+      --ckpt_path  "path/to/checkpoint"  \
+      --final_model_path "/path/to/huggingface_model"  \
+      --name "the name you wish to give to the converted model."  \
+      --model_config  configs/model/distill_mmMamba.yaml  \
+      --distill_stage3_config configs/experiment/distill_stage3_mmMamba.yaml
+```
+
+### Command-Line Arguments
+- --teacher_path: Path to the teacher model weights.
+- --ckpt_path: Path to the checkpoint file you want to convert.
+- --final_model_path: Path where the converted model will be saved.
+- --name: The name you wish to give to the converted model..
+- --model_config: Path to the model configuration file.
+- --distill_stage3_config: Path to the distillation stage 3 configuration file.
+
+### Detailed Steps
+#### 1.Prepare the Paths
+- Ensure that you have the correct paths for the teacher model, checkpoint, and where you want to save the final model.
+- Update the paths in the command according to your file system structure.
+
+#### 2.Run the Conversion Script
+- Execute the command in your terminal or command prompt.
+- The script will perform the necessary conversions and save the model to the specified path.
+
+#### 3.Verify the Conversion
+- After the script completes, check the specified final_model_path to ensure the model has been saved correctly.
+
+#### 4.Add model execution code:
+Include these Python files from [the Hugging Face model repository](https://huggingface.co/hustvl/mmMamba-linear) into your model weight file:
+- configuration_mmMamba.py
+- configuration_mmMamba_chat.py
+- configuration_mmMamba_embedding.py
+- conversation.py
+- modeling_mmMamba.py
+- modeling_mmMamba_chat.py
+- modeling_mmMamba_embedding.py
+
+After this, you can follow the steps in the "Quick Start" section below to perform inference tasks with your own trained model.
+
+
+## Quick Start Guide for mmMamba Inference
 
 We provide example code to run mmMamba inference using the Transformers library.
 
-## Main Dependencies for Model Inference
+
+### Main Dependencies for Model Inference
 
 Below are the primary dependencies required for model inference:
 - torch==2.1.0
@@ -24,7 +79,7 @@ Below are the primary dependencies required for model inference:
 - seaborn
 
 
-## Inference with Transformers
+### Inference with Transformers
 
 ```python
 import numpy as np
@@ -133,3 +188,6 @@ question = '<image>\nPlease describe the image shortly.'
 response = model.chat(tokenizer, pixel_values, question, generation_config)
 print(f'User: {question}\nAssistant: {response}')
 ```
+
+### Note: 
+The model path can point to either the model we uploaded on Hugging Face or the model converted by yourself in "Post-training Weight Converting" section.
