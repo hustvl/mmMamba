@@ -56,9 +56,9 @@ mmMamba is greatly inspired by the following outstanding contributions to the op
 If you find mmMamba is useful in your research or applications, please consider giving us a star 🌟 and citing it by the following BibTeX entry.
 
 ```bibtex
- @article{mmMamba,
-  title={mmMamba: Decoder-only Multimodal State Space Model via Quadratic to Linear Distillation},
-  author={Bencheng Liao and Hongyuan Tao and Qian Zhang and Tianheng Cheng and Yingyue Li and Haoran Yin and Wenyu Liu and Xinggang Wang},
+@article{liao2025multimodal,
+  title={Multimodal Mamba: Decoder-only Multimodal State Space Model via Quadratic to Linear Distillation},
+  author={Liao, Bencheng and Tao, Hongyuan and Zhang, Qian and Cheng, Tianheng and Li, Yingyue and Yin, Haoran and Liu, Wenyu and Wang, Xinggang},
   journal={arXiv preprint arXiv:2502.13145},
   year={2025}
 }
