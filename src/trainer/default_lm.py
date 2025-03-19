@@ -62,7 +62,7 @@ class OurTrainer():
         super().__init__()
         self.model = model
         self.accelerator = accelerator
-        self.step = 0  # Total steps taken
+        self.step = -1  # Total steps taken
         self.grad_step = 0  # Total gradient updates
         self.max_length = max_length
         self.compute_loss_backprop = False  # Whether we backprop in self.
@@ -198,6 +198,7 @@ class OurTrainer():
             step_start = time.time()
             
             with self.accelerator.accumulate(model):
+                self.step += 1
                 if data is None or data["input_ids"].shape[-1] > self.max_length:
                     print("data warning! skip this round")
                     self.logger.warning("data warning! skip this round")
@@ -221,9 +222,7 @@ class OurTrainer():
                     self.grad_step += 1
                 if not self.compute_loss_backprop:
                     loss = loss.detach().cpu().item()
-
-                self.step += 1
-
+                    
                 # Calculate time per step and ETA
                 step_time = time.time() - step_start
                 steps_remaining = self.max_steps - self.grad_step
