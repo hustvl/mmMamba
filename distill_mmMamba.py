@@ -124,7 +124,7 @@ def main():
         model = InternVLChatModel.from_pretrained(
             model_config.model.pretrained_model_name_or_path,
             torch_dtype=torch.bfloat16,
-            low_cpu_mem_usage=True).eval()
+            low_cpu_mem_usage=False).eval()
         tokenizer = AutoTokenizer.from_pretrained(model_config.model.pretrained_model_name_or_path, trust_remote_code=True, use_fast=False)
     else:
         model_loader = get_pretrained_loader(**model_config.model,
@@ -461,7 +461,7 @@ def main():
         teacher_model = InternVLChatModel.from_pretrained(
             model_config.model.pretrained_model_name_or_path,
             torch_dtype=torch.bfloat16,
-            low_cpu_mem_usage=True).eval()
+            low_cpu_mem_usage=False).eval()
         for param in teacher_model.parameters():
             param.requires_grad = False
 
