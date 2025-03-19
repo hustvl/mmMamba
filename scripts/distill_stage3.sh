@@ -8,7 +8,7 @@ accelerate launch \
   --main_process_port  "11122"  \
     distill_mmMamba.py \
   --model_config distill_mmMamba \
-  --distill_stage1_config distill_stage3_mmMamba \
+  --distill_stage3_config distill_stage3_mmMamba \
   --checkpoint_dir ./checkpoints \
   --train_stage3  \
   --verbose \
