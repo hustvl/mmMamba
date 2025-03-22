@@ -36,7 +36,7 @@ bash scripts/distill_stage1.sh
 bash scripts/distill_stage2.sh
 ```
 ```bash
-bash scripts/distill_stage2.sh
+bash scripts/distill_stage3.sh
 ```
 #### Notes
 - The --load_distill_checkpoint in the script is optional and is used to import an existing checkpoint. Please replace it with the corresponding ckpt path.
