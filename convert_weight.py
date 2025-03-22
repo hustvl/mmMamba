@@ -41,7 +41,7 @@ def main():
     model = InternVLChatModel.from_pretrained(
                 args.teacher_path,
                 torch_dtype=torch.bfloat16,
-                low_cpu_mem_usage=True).eval().cuda()
+                low_cpu_mem_usage=False).eval().cuda()
     tokenizer = AutoTokenizer.from_pretrained(args.teacher_path, trust_remote_code=True, use_fast=False)
 
     model = load_and_convert_attns(model, model_config, 
@@ -90,7 +90,6 @@ def main():
     config["llm_config"]["model_type"] = "mmMamba"
     config["model_type"] = "mmMamba_chat"
 
-    del config["layers_block_type"]
     config["embedding_config"]["layers_block_type"] = ["mamba2","mamba2","mamba2","mamba2","mamba2","mamba2","mamba2","mamba2"]
     config["llm_config"]["layers_block_type"] = ["mamba2","mamba2","mamba2","mamba2","mamba2","mamba2","mamba2","mamba2",
                                                  "mamba2","mamba2","mamba2","mamba2","mamba2","mamba2","mamba2","mamba2",
