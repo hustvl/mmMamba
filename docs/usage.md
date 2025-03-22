@@ -45,6 +45,7 @@ Include these Python files from [the Hugging Face model repository](https://hugg
 - configuration_mmMamba_chat.py
 - configuration_mmMamba_embedding.py
 - conversation.py
+- fused_norm_gate.py
 - modeling_mmMamba.py
 - modeling_mmMamba_chat.py
 - modeling_mmMamba_embedding.py
