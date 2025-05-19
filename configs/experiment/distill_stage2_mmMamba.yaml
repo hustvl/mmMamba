@@ -28,18 +28,14 @@ dataloader:
 
 optimizer:
   optim: adamw_torch_fused
-  lr: 0.0005                         #学习率
-  weight_decay: 0.0
+  lr: 0.0005                     
+  weight_decay: 0.05
 
 lr_scheduler:
-  lr_scheduler_type: reduce_lr_on_plateau
-  mode: min
-  factor: 0.1
-  patience: 10
-  min_lr: 0.00001
-  #lr_scheduler_type: linear
-  #num_warmup_steps: 200
-  #num_training_steps: 230000
+  lr_scheduler_type: wsd
+  num_warmup_steps: 5000
+  num_stable_steps: 40000
+  num_decay_steps: 5000
 
 trainer:  # HuggingFace Trainer-like arguments  
   name: distill_every_layer
@@ -50,7 +46,7 @@ trainer:  # HuggingFace Trainer-like arguments
   train_split: train
   val_split: validation
   num_train_epochs: 1
-  gradient_accumulation_steps: 1
+  gradient_accumulation_steps: 8
   gradient_clip: -1
   seed: 42
   batch_size: 1
